@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:cache="http://www.springframework.org/schema/cache"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+       http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-4.0.xsd
+        http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
+
+    <context:component-scan base-package="com.jzg.framework.jms"/>
+    <context:property-placeholder location="classpath:conf/activemq.properties"></context:property-placeholder>
+
+    <!-- TOPIC连接工厂 -->
+    <bean id="topicSendConnectionFactory" class="org.apache.activemq.spring.ActiveMQConnectionFactory">
+        <property name="brokerURL" value="${activemq.brokerURL}" />
+        <property name="useAsyncSend" value="true" />
+    </bean>
+
+    <bean id="topicListenConnectionFactory" class="org.apache.activemq.spring.ActiveMQConnectionFactory">
+        <property name="brokerURL" value="${activemq.brokerURL}" />
+    </bean>
+
+
+    <!-- Spring用于管理真正的ConnectionFactory的ConnectionFactory -->
+    <bean id="singleConnectionFactory" class="org.springframework.jms.connection.SingleConnectionFactory">
+        <!-- 目标ConnectionFactory对应真实的可以产生JMS Connection的ConnectionFactory -->
+        <property name="targetConnectionFactory" ref="topicSendConnectionFactory"/>
+    </bean>
+
+
+    <!--主题目的地，一对多的-->
+    <bean id="topicDestination" class="org.apache.activemq.command.ActiveMQTopic">
+        <constructor-arg name="name" value="topic"/>
+    </bean>
+
+    <!-- Spring提供的JMS工具类，它可以进行消息发送、接收等 -->
+    <bean id="topicSendJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <!-- 这个connectionFactory对应的是我们定义的Spring提供的那个ConnectionFactory对象 -->
+        <property name="connectionFactory" ref="singleConnectionFactory"/>
+        <property name="defaultDestination" ref="topicDestination" />
+        <!--<property name="messageConverter" ref="messageConverter" />-->
+        <!-- 开启订阅模式 -->
+        <property name="pubSubDomain" value="true" />
+        <!-- deliveryMode, priority, timeToLive 的开关，要生效，必须配置为true，默认false-->
+        <property name="explicitQosEnabled" value="true" />
+        <!-- 发送模式  DeliveryMode.NON_PERSISTENT=1:非持久 ; DeliveryMode.PERSISTENT=2:持久-->
+        <property name="deliveryMode" value="2" />
+        <!--消息应答(签收)方式   不带事务的Session签收方式  DefaultListner仅支持自动签收
+        Session.AUTO_ACKNOWLEDGE 1 消息自动签收
+        Session.CLIENT_ACKNOWLEDGE  2 客户端调用acknowledge方法手动签收
+        Session.DUPS_OK_ACKNOWLEDGE 3 不必必须签收，消息可能会重复发送
+        Session.INDIVIDUAL_ACKNOWLEDGE 4 单条消息确认 仅ActiveMQ支持-->
+        <property name="sessionAcknowledgeMode" value="1" />
+    </bean>
+
+
+
+
+    <bean id="jmsCallback" class="com.jzg.framework.jms.test.JmsCallbackEntity"></bean>
+    <!-- 消息监听器 -->
+    <bean id="topicMessageReceiver" class="com.jzg.framework.jms.DefaultListener">
+        <constructor-arg name="jmsCallback" ref="jmsCallback"/>
+    </bean>
+    <!--<bean id="topicMessageReceiver" class="com.jzgframework.jms.SessionListener"/>-->
+
+    <!-- 主题消息监听容器 -->
+    <bean id="listenerContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="connectionFactory" ref="topicListenConnectionFactory"/>
+        <property name="pubSubDomain" value="true"/><!-- default is false -->
+        <property name="destination" ref="topicDestination" />  <!-- listen ack: myTopic -->
+        <!--持久订阅-->
+        <property name="subscriptionDurable" value="true"/>
+        <property name="clientId" value="clientId_001"/>
+        <property name="messageListener" ref="topicMessageReceiver" />
+        <property name="cacheLevel" value="3" />
+        <property name="sessionAcknowledgeMode" value="2" />
+    </bean>
+
+
+    <bean id="listenerContainer2" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="connectionFactory" ref="topicListenConnectionFactory"/>
+        <property name="pubSubDomain" value="true"/><!-- default is false -->
+        <property name="destination" ref="topicDestination" />  <!-- listen ack: myTopic -->
+        <property name="subscriptionDurable" value="true"/>
+        <property name="clientId" value="clientId_002"/>
+        <property name="messageListener" ref="topicMessageReceiver" />
+        <property name="cacheLevel" value="3" />
+        <property name="sessionAcknowledgeMode" value="2" />
+    </bean>
+
+    <bean id="listenerContainer3" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="connectionFactory" ref="topicListenConnectionFactory"/>
+        <property name="pubSubDomain" value="true"/><!-- default is false -->
+        <property name="destination" ref="topicDestination" />  <!-- listen ack: myTopic -->
+        <property name="subscriptionDurable" value="true"/>
+        <property name="clientId" value="clientId_003"/>
+        <property name="messageListener" ref="topicMessageReceiver" />
+        <property name="cacheLevel" value="3" />
+        <property name="sessionAcknowledgeMode" value="2" />
+    </bean>
+</beans>

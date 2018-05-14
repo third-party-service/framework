@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd">
+
+
+    <!-- 激活自动代理功能 -->
+    <aop:aspectj-autoproxy proxy-target-class="true"/>
+
+    <!--<aop:config>
+        &lt;!&ndash; 声明一个切面,并注入切面Bean,相当于@Aspect &ndash;&gt;
+        <aop:aspect id="cacheAspect" ref="aspect">
+            &lt;!&ndash; 配置一个切入点,相当于@Pointcut &ndash;&gt;
+            <aop:pointcut id="cachePointCut"
+                          expression="@annotation(com.jzgframework.cache.com.jzgframework.cache.Cacheable)"/>
+            &lt;!&ndash; 配置通知,相当于@Before、@After、@AfterReturn、@Around、@AfterThrowing &ndash;&gt;
+            &lt;!&ndash;<aop:before pointcut-ref="cachePointCut" method="before"/>&ndash;&gt;
+            &lt;!&ndash;<aop:after pointcut-ref="cachePointCut" method="after"/>&ndash;&gt;
+            <aop:around pointcut-ref="cachePointCut" method="around"/>
+            &lt;!&ndash;<aop:after-returning pointcut-ref="cachePointCut" method="afterReturn"/>&ndash;&gt;
+            &lt;!&ndash;<aop:after-throwing pointcut-ref="cachePointCut" method="afterThrowing" throwing="ex"/>&ndash;&gt;
+        </aop:aspect>
+    </aop:config>
+
+    <bean id="aspect" class="com.jzgframework.cache.aop.CacheAspect"/>
+    <bean name="cache" class="LocalCacheProvider"></bean>-->
+</beans> 

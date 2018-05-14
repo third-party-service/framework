@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:cache="http://www.springframework.org/schema/cache"
+       xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+       http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-4.0.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+        http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache-4.0.xsd">
+
+    <context:component-scan base-package="com.jzg.framework.cache"/>
+    <context:property-placeholder location="classpath:conf/redis.properties" order="1" ignore-unresolvable="false"/>
+
+    <!-- 激活自动代理功能 -->
+    <aop:aspectj-autoproxy proxy-target-class="true"/>
+
+    <!--<aop:config>
+        &lt;!&ndash; 声明一个切面,并注入切面Bean,相当于@Aspect &ndash;&gt;
+        <aop:aspect id="cacheAspect" ref="cacheAdvice">
+            &lt;!&ndash; 配置一个切入点,相当于@Pointcut &ndash;&gt;
+            <aop:pointcut id="cachePointCut"
+                          expression="@annotation(com.jzgframework.cache.com.jzgframework.cache.Cacheable)"/>
+            &lt;!&ndash; 配置通知,相当于@Before、@After、@AfterReturn、@Around、@AfterThrowing &ndash;&gt;
+            &lt;!&ndash;<aop:before pointcut-ref="cachePointCut" method="before"/>&ndash;&gt;
+            &lt;!&ndash;<aop:after pointcut-ref="cachePointCut" method="after"/>&ndash;&gt;
+            <aop:around pointcut-ref="cachePointCut" method="around"/>
+            &lt;!&ndash;<aop:after-returning pointcut-ref="cachePointCut" method="afterReturn"/>&ndash;&gt;
+            &lt;!&ndash;<aop:after-throwing pointcut-ref="cachePointCut" method="afterThrowing" throwing="ex"/>&ndash;&gt;
+        </aop:aspect>
+    </aop:config>
+
+    <bean id="cacheAdvice" class="com.jzgframework.cache.aop.CacheAspect"/>-->
+
+    <!--Cacheable注解自动缓存  实际缓存提供方-->
+    <!--<bean name="cache" class="LocalCacheProvider"></bean>-->
+    <!--<bean name="cache" class="com.jzgframework.cache.mchedCacheProvider"></bean>-->
+    <!--<bean name="cache" class="com.jzgframework.cache.redis.RedisCacheProvider"></bean>-->
+
+
+
+
+
+
+
+
+    <!--local cache start -->
+    <!--<bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
+        <property name="caches">
+            <set>
+                <bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean">
+                    <property name="name" val="default"/>
+                </bean>
+                <bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean">
+                    <property name="name" val="userCache"/>
+                </bean>
+            </set>
+        </property>
+    </bean>
+
+
+    <bean id="guavaCacheManager" class="org.springframework.cache.guava.GuavaCacheManager">
+        <property name="cacheSpecification" val="concurrencyLevel=4,expireAfterAccess=100s,expireAfterWrite=100s"/>
+        <property name="cacheNames">
+            <list>
+                &lt;!&ndash;<val>dictTableCache</val>&ndash;&gt;
+                <val>default</val>
+                <val>userCache</val>
+            </list>
+        </property>
+    </bean>-->
+
+
+    <!--<bean name="localCache" class="LocalCacheProvider"></bean>-->
+    <!--<bean name="guavaCache" class="GuavaCacheProvider"></bean>-->
+    <!--local cache end -->
+
+
+
+
+
+    <!--Memcached start -->
+    <!--<bean name="memcachedClientBuilder" class="net.rubyeye.xmemcached.XMemcachedClientBuilder">
+        &lt;!&ndash; XMemcachedClientBuilder have two arguments.First is server list,and
+            second is weights array. &ndash;&gt;
+        <constructor-arg>
+            <list>
+                <bean class="java.net.InetSocketAddress">
+                    <constructor-arg>
+                        <val>${memcached.server.host}</val>
+                    </constructor-arg>
+                    <constructor-arg>
+                        <val>${memcached.server.port}</val>
+                    </constructor-arg>
+                </bean>
+                &lt;!&ndash;<bean class="java.net.InetSocketAddress">
+                    <constructor-arg>
+                        <val>${mc.server2.host}</val>
+                    </constructor-arg>
+                    <constructor-arg>
+                        <val>${mc.server2.port}</val>
+                    </constructor-arg>
+                </bean>&ndash;&gt;
+            </list>
+        </constructor-arg>
+        <constructor-arg>
+            <list>
+                <val>${memcached.server.weight}</val>
+                &lt;!&ndash;<val>${mc.server2.weight}</val>&ndash;&gt;
+            </list>
+        </constructor-arg>
+        <property name="connectionPoolSize" val="${memcached.connectionPoolSize}"/>
+        <property name="failureMode" val="${memcached.failureMode}"/>
+
+        &lt;!&ndash;文本传输传输&ndash;&gt;
+        &lt;!&ndash;<property name="commandFactory">
+            <bean class="net.rubyeye.xmemcached.command.TextCommandFactory"/>
+        </property>&ndash;&gt;
+        &lt;!&ndash;二进制形式传输&ndash;&gt;
+        <property name="commandFactory">
+            <bean class="net.rubyeye.xmemcached.command.BinaryCommandFactory"/>
+        </property>
+
+        <property name="sessionLocator">
+            <bean class="net.rubyeye.xmemcactemplateimpl.KetamaMemcachedSessionLocator"/>
+        </property>
+        <property name="transcoder">
+            <bean class="net.rubyeye.xmemcached.transcoders.SerializingTranscoder"/>
+        </property>
+    </bean>
+    &lt;!&ndash; Use factory bean to build mc client &ndash;&gt;
+    <bean name="memcachedClient" factory-bean="memcachedClientBuilder"
+          factory-method="build" destroy-method="shutdown"  scope="singleton"/>-->
+
+    <!--<bean name="memcachedCache" class="com.jzgframework.cache.mchedCacheProvider"></bean>-->
+    <!--Memcached end -->
+
+
+
+    <!--redis start -->
+    <!--统一到项目的context:property-placeholder中-->
+    <!--<context:property-placeholder location="classpath:conf/redis.properties" />-->
+
+    <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+        <property name="maxIdle" value="${redis.maxIdle}" />
+        <property name="maxTotal" value="${redis.maxTotal}" />
+        <property name="maxWaitMillis" value="${redis.maxWaitMillis}" />
+        <property name="testOnBorrow" value="${redis.testOnBorrow}" />
+        <property name="testOnReturn" value="${redis.testOnReturn}" />
+        <property name="testWhileIdle" value="${redis.testWhileIdle}" />
+    </bean>
+    <bean id="shardedJedisPool" class="redis.clients.jedis.ShardedJedisPool"  scope="singleton">
+        <constructor-arg index="0" ref="jedisPoolConfig" />
+        <constructor-arg index="1">
+            <list>
+                <bean class="redis.clients.jedis.JedisShardInfo">
+                    <constructor-arg name="host" value="${redis.host}" />
+                    <constructor-arg name="port" value="${redis.port}" />
+                    <constructor-arg name="timeout" value="${redis.timeout}" />
+                    <property name="password" value="${redis.password}" />
+                </bean>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <!--<bean name="redisCache" class="RedisCacheProvider"></bean>-->
+    <!--redis end -->
+</beans>
