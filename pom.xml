@@ -31,7 +31,7 @@
     <properties>
         <!--<jzg.framework.version>1.0.0-SNAPSHOT</jzg.framework.version>-->
 
-        <spring.version>4.2.3.RELEASE</spring.version>
+        <spring.version>5.1.1.RELEASE</spring.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mybatis.version>3.2.2</mybatis.version>
         <mysql.version>5.1.38</mysql.version>
@@ -49,7 +49,7 @@
         <spring_redis_version>1.7.1.RELEASE</spring_redis_version>
         <xmemcached_version>2.0.0</xmemcached_version>
         <xmemcached-provider>3.5.0</xmemcached-provider>
-        <activemq_version>5.7.0</activemq_version>
+        <activemq_version>5.15.16</activemq_version>
 
         <junit_version>4.11</junit_version>
         <easymock_version>3.4</easymock_version>
